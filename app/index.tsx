@@ -5,9 +5,23 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { images } from "../constants";
 import { StatusBar } from "expo-status-bar";
 import CustomButton from "@/components/CustomButton";
+import { useUserContext } from "@/context/UserContextProvider";
 
 
 const Welcome = () => {
+
+  const { loading, isLogged } = useUserContext();
+
+  if (loading) {
+    return (
+      <View className="flex justify-center items-center h-full">
+        <Text>Loading...</Text>
+      </View>
+    )
+  }
+
+  if (!loading && isLogged) return <Redirect href="/home" />
+
   return (
     <SafeAreaView className="bg-primary h-full">
 
