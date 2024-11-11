@@ -5,10 +5,11 @@ import SearchInput from '../../components/SearchInput';
 import LatestVideos from '../../components/LatestVideos';
 import EmptyState from '../../components/EmptyState';
 import VideoCard from '../../components/VideoCard';
-
+import { useUserContext } from '../../context/UserContextProvider';
 import { useState } from 'react';
 
 const Home = () => {
+  const { user } = useUserContext()
 
 
   const [refreshing, setRefreshing] = useState(false)
@@ -53,7 +54,7 @@ const Home = () => {
                   Welcome
                 </Text>
                 <Text className="text-2xl font-psemibold text-white" >
-                  User
+                  {user?.username}
                 </Text>
               </View>
               <View>
@@ -71,7 +72,7 @@ const Home = () => {
               <Text className="text-lg font-pregular text-gray-100 mb-3">
                 Latest Videos
               </Text>
-              {/* <LatestVideos /> */}
+              <LatestVideos />
             </View>
           </View>
         )}
