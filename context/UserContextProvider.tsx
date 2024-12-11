@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { getCurrentUser } from "../lib/appwrite.config";
+import { getCurrentUser } from "@/lib/appwrite.config";
+import { createContext, useContext, useEffect, useState } from "react"
 
 type UserContextType = {
     isLogged: boolean;
@@ -9,19 +9,18 @@ type UserContextType = {
     loading: boolean;
 };
 
-const UserContext = createContext<UserContextType>({} as UserContextType);
-
-export const useUserContext = () => useContext(UserContext);
-
 type UserContextProviderProps = {
     children: React.ReactNode;
 }
 
-const UserContextProvider = ({ children }: UserContextProviderProps) => {
-    const [isLogged, setIsLogged] = useState(false);
-    const [user, setUser] = useState<{} | null>(null);
-    const [loading, setLoading] = useState(true);
+const UserContext = createContext<UserContextType>({} as UserContextType);
 
+export const useUserContext = () => useContext(UserContext);
+
+const UserContextProvider = ({ children }: UserContextProviderProps) => {
+    const [isLogged, setIsLogged] = useState(false)
+    const [user, setUser] = useState<{} | null>(null)
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         setLoading(true)
@@ -30,7 +29,6 @@ const UserContextProvider = ({ children }: UserContextProviderProps) => {
                 if (res) {
                     setIsLogged(true)
                     setUser(res)
-
                 } else {
                     setIsLogged(false)
                     setUser(null)
@@ -44,7 +42,6 @@ const UserContextProvider = ({ children }: UserContextProviderProps) => {
             .finally(() => {
                 setLoading(false)
             })
-
     }, [])
 
 
@@ -54,13 +51,11 @@ const UserContextProvider = ({ children }: UserContextProviderProps) => {
             setIsLogged,
             user,
             setUser,
-            loading,
+            loading
         }} >
             {children}
-        </UserContext.Provider >
+        </UserContext.Provider>
     )
+}
 
-};
-
-
-export default UserContextProvider;
+export default UserContextProvider

@@ -1,11 +1,12 @@
-import FormField from '@/components/FormField'
 import { View, Text, ScrollView, Image, Alert } from 'react-native'
+import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { images } from '@/constants'
-import { useState } from 'react'
-import CustomButton from '@/components/CustomButton'
+import FormField from '@/components/FormField'
 import { Link, router } from 'expo-router'
+import CustomButton from '@/components/CustomButton'
 import { signIn } from '@/lib/appwrite.config'
+import { useUserContext } from '@/context/UserContextProvider'
 
 const SignIn = () => {
 
@@ -14,19 +15,26 @@ const SignIn = () => {
     password: ''
   })
 
+  const {setIsLogged, setUser} = useUserContext()
+
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleSubmit = async () => {
     setIsSubmitting(true)
     if (!form.email || !form.password) {
-      Alert.alert('Error', 'All fields are required')
+      Alert.alert('Error', 'Please fill in all fields')
       return
     }
-
     try {
-      await signIn(form.email, form.password)
+      const user = await signIn(form.email, form.password)
+      if (!user) {
+        Alert.alert('Error', 'Invalid credentials')
+        return
+      }
+      setIsLogged(true)
+      setUser(user)
 
-      router.replace("/home");
+      router.replace('/home')
 
     } catch (error: any) {
       Alert.alert('Error', error.message)
@@ -34,14 +42,13 @@ const SignIn = () => {
     } finally {
       setIsSubmitting(false)
     }
-
   }
 
   return (
     <SafeAreaView className='bg-primary h-full' >
       <ScrollView>
         <View
-          className="w-full h-full flex justify-center px-4 my-6"
+          className='w-full h-full flex justify-center px-4 my-6'
         >
           <Image
             source={images.logo}
@@ -49,30 +56,31 @@ const SignIn = () => {
             className='w-[115px] h-[34px]'
           />
 
-          <Text className='text-2xl font-semibold text-white mt-10 font-psemibold' >
+          <Text
+            className='text-2xl font-semibold text-white mt-10 font-psemibold'
+          >
             Log in to Aora
           </Text>
 
           <FormField
             title='Email'
             value={form.email}
+            placeholder='Enter your email'
             otherStyles='mt-7'
             handleChangeText={(text) => setForm({ ...form, email: text })}
-            keyboardType="email-address"
-            placeholder='Enter your email'
           />
 
           <FormField
             title='Password'
             value={form.password}
-            handleChangeText={(text) => setForm({ ...form, password: text })}
+            placeholder='Enter your password'
             otherStyles='mt-7'
-            placeholder='Password'
+            handleChangeText={(text) => setForm({ ...form, password: text })}
           />
 
           <View className='flex items-end '>
             <Link href="/" className='text-lg text-gray-100 pt-5' >
-              Forgot Password
+              Forgot password?
             </Link>
           </View>
 
@@ -83,9 +91,8 @@ const SignIn = () => {
             isLoading={isSubmitting}
           />
 
-
-          <View className='flex justify-center pt-5 flex-row gap-2' >
-            <Text className='text-lg text-gray-100 font-pregular' >
+          <View className='flex flex-row justify-center pt-5 gap-2 items-center ' >
+            <Text className='text-gray-100 text-lg font-pregular' >
               Don't have an account?
             </Text>
 
@@ -96,13 +103,9 @@ const SignIn = () => {
               Signup
             </Link>
 
-
           </View>
-
-
         </View>
       </ScrollView>
-
     </SafeAreaView>
   )
 }

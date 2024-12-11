@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Image, Alert } from 'react-native'
+import { View, Text, Alert, ScrollView, Image, Button } from 'react-native'
 import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { images } from '@/constants'
@@ -6,36 +6,39 @@ import FormField from '@/components/FormField'
 import CustomButton from '@/components/CustomButton'
 import { Link, router } from 'expo-router'
 import { createUser } from '@/lib/appwrite.config'
+import { useUserContext } from '@/context/UserContextProvider'
 
 const SignUp = () => {
-
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { setUser, setIsLogged } = useUserContext()
 
   const [form, setForm] = useState({
     username: '',
-    email: '',
     password: '',
+    email: '',
   })
 
   const handleSubmit = async () => {
-
     setIsSubmitting(true)
     if (!form.username || !form.email || !form.password) {
-      Alert.alert('Error', 'All fields are required')
+      Alert.alert('Error', 'Please fill in all fields')
       setIsSubmitting(false)
       return
     }
 
     try {
-      const result = await createUser(form.email, form.password, form.username);
+      const user = await createUser(form.email, form.password, form.username)
 
-      if (!result) {
-        throw new Error('Account creation failed')
+      if (user) {
+        Alert.alert('Success', 'Account created successfully 🎉')
       }
 
-      console.log('result', result) 
+      console.log("User", user)
 
-      router.replace('/home')
+      setUser(user)
+      setIsLogged(true)
+
+      router.replace("/home")
 
 
     } catch (error: any) {
@@ -50,17 +53,16 @@ const SignUp = () => {
     <SafeAreaView className='bg-primary h-full'>
       <ScrollView>
         <View
-          className='w-full h-full  px-4 my-6 flex justify-center '
+          className='w-full h-full px-4 my-6 flex justify-center'
         >
-
           <Image
             source={images.logo}
-            resizeMode='contain'
+            resizeMode="contain"
             className='w-[115px] h-[34px]'
           />
 
           <Text
-            className='text-2xl text-white font-semibold mt-10 font-psemibold '
+            className='text-2xl text-white font-semibold mt-10 font-psemibold'
           >
             Sign Up
           </Text>
@@ -68,18 +70,17 @@ const SignUp = () => {
           <FormField
             title='Username'
             value={form.username}
-            otherStyles='mt-10'
             handleChangeText={(text) => setForm({ ...form, username: text })}
             placeholder='Your unique username'
+            otherStyles='mt-10'
           />
 
           <FormField
             title='Email'
             value={form.email}
-            otherStyles='mt-7'
-            keyboardType="email-address"
             handleChangeText={(text) => setForm({ ...form, email: text })}
             placeholder='name@example.com'
+            otherStyles='mt-7'
           />
 
           <FormField
@@ -87,7 +88,6 @@ const SignUp = () => {
             value={form.password}
             handleChangeText={(text) => setForm({ ...form, password: text })}
             otherStyles='mt-7'
-            placeholder='Password'
           />
 
           <CustomButton
@@ -95,13 +95,10 @@ const SignUp = () => {
             handlePress={handleSubmit}
             containerStyles='mt-7'
             isLoading={isSubmitting}
-
           />
 
-
           <View className='flex flex-row justify-center gap-2 pt-5' >
-
-            <Text className='text-lg text-gray-100 font-pregular' >
+            <Text className='text-lg text-gray-100 font-pregular'>
               Already have an account?
             </Text>
 
@@ -111,6 +108,7 @@ const SignUp = () => {
             >
               Login
             </Link>
+
           </View>
 
         </View>
