@@ -122,7 +122,7 @@ const Home = () => {
         ListHeaderComponent={() => (
           <View className='flex my-6 px-4 space-y-6' >
 
-            <View className='flex flex-row items-center justify-between mb-6 border-2 ' >
+            <View className='flex flex-row items-center justify-between mb-6 ' >
               <View>
                 <Text className='font-psemibold text-sm text-gray-100'>
                   Welcome

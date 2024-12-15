@@ -5,7 +5,7 @@ import { images } from '@/constants'
 import FormField from '@/components/FormField'
 import { Link, router } from 'expo-router'
 import CustomButton from '@/components/CustomButton'
-import { signIn } from '@/lib/appwrite.config'
+import { getCurrentUser, signIn } from '@/lib/appwrite.config'
 import { useUserContext } from '@/context/UserContextProvider'
 
 const SignIn = () => {
@@ -15,7 +15,7 @@ const SignIn = () => {
     password: ''
   })
 
-  const {setIsLogged, setUser} = useUserContext()
+  const { setIsLogged, setUser } = useUserContext()
 
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -26,13 +26,19 @@ const SignIn = () => {
       return
     }
     try {
-      const user = await signIn(form.email, form.password)
-      if (!user) {
+      const session = await signIn(form.email, form.password)
+      if (!session) {
         Alert.alert('Error', 'Invalid credentials')
+        return
+      }
+      const user = await getCurrentUser();
+      if (!user) {
+        Alert.alert('Error', 'User not found')
         return
       }
       setIsLogged(true)
       setUser(user)
+      console.log("i am sign in user", user)
 
       router.replace('/home')
 
