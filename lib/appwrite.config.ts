@@ -124,3 +124,64 @@ export async function getCurrentUser() {
         return null;
     }
 }
+
+export async function getAllPosts() {
+    try {
+        const posts = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.videoCollectionId
+        );
+
+        return posts.documents;
+    } catch (error: any) {
+        throw new Error(error);
+    }
+}
+
+// Get video posts created by user
+export async function getUserPosts(userId: string) {
+    try {
+        const posts = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.videoCollectionId,
+            [Query.equal("creator", userId)]
+        );
+
+        return posts.documents;
+    } catch (error: any) {
+        throw new Error(error);
+    }
+}
+
+// Get video posts that matches search query
+export async function searchPosts(query: string) {
+    try {
+        const posts = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.videoCollectionId,
+            [Query.search("title", query)]
+        );
+
+
+        if (!posts) throw new Error("Something went wrong");
+
+        return posts.documents;
+    } catch (error: any) {
+        throw new Error(error);
+    }
+}
+
+// Get latest created video posts
+export async function getLatestPosts() {
+    try {
+        const posts = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.videoCollectionId,
+            [Query.orderDesc("$createdAt"), Query.limit(7)]
+        );
+
+        return posts.documents;
+    } catch (error: any) {
+        throw new Error(error);
+    }
+}
