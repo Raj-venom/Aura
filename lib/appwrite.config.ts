@@ -1,9 +1,11 @@
+import { FormFieldType } from "@/app/(tabs)/create";
 import {
     Account,
     Avatars,
     Client,
     Databases,
     ID,
+    ImageGravity,
     Query,
     Storage,
 } from "react-native-appwrite";
@@ -122,6 +124,104 @@ export async function getCurrentUser() {
     } catch (error: any) {
         console.log(error);
         return null;
+    }
+}
+
+interface FileInput {
+    mimeType: string; // e.g., "image/png", "video/mp4"
+    name: string;     // file name
+    size?: number;    // optional file size
+    uri: string;          // File path or URI
+    [key: string]: any; // Allow other optional fields
+}
+
+type FileType = "image" | "video";
+
+// upload File
+export async function uploadFile(file: FileInput, type: FileType) {
+    if (!file) return;
+
+    const { mimeType, ...rest } = file;
+    const asset = { type: mimeType, size: file.size ?? 0, ...rest };
+
+    try {
+        const uploadedFile = await storage.createFile(
+            appwriteConfig.storageId,
+            ID.unique(),
+            asset
+        )
+
+        const fileUrl = await getFilePreview(uploadedFile.$id, type);
+        return fileUrl;
+
+    } catch (error: any) {
+        throw new Error(error);
+    }
+}
+
+export async function getFilePreview(fileId: string, type: FileType) {
+    let fileUrl;
+
+    try {
+        if (type === "video") {
+            fileUrl = storage.getFilePreview(appwriteConfig.storageId, fileId);
+        } else if (type === "image") {
+            fileUrl = storage.getFilePreview(
+                appwriteConfig.storageId,
+                fileId,
+                2000,
+                2000,
+                ImageGravity.Top,
+                100
+            );
+        } else {
+            throw new Error("Invalid file type");
+        }
+
+        if (!fileUrl) {
+            throw new Error("File not found");
+        }
+
+        return fileUrl;
+
+    } catch (error: any) {
+        throw new Error(error);
+
+    }
+}
+
+
+// crate new video post
+export async function createVideoPost(form: FormFieldType) {
+
+    if (!form.video || !form.thumbnail) {
+        throw new Error("Video and thumbnail are required");
+    }
+
+    try {
+        const [thumbnailUrl, videoUrl] = await Promise.all([
+
+            // @ts-ignore
+            uploadFile(form.thumbnail, "image"),
+            // @ts-ignore
+            uploadFile(form.video, "video"),
+        ]);
+
+        const newPost = await databases.createDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.videoCollectionId,
+            ID.unique(),
+            {
+                title: form.title,
+                prompt: form.prompt,
+                thumbnail: thumbnailUrl,
+                video: videoUrl,
+                creator: form.userId
+            }
+        )
+
+    } catch (error: any) {
+        throw new Error(error);
     }
 }
 
